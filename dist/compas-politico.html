@@ -67,7 +67,7 @@ button { font: inherit; color: inherit; }
 .wrap { width: 100%; max-width: 760px; margin: 0 auto; padding: 0 16px; }
 
 /* ---------- Barra superior ---------- */
-.topbar { border-bottom: 1px solid var(--line); background: var(--bg); position: sticky; top: 0; z-index: 5; }
+.topbar { border-bottom: 1px solid var(--line); background: var(--bg); position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; }
 .topbar-inner { display: flex; align-items: center; justify-content: space-between; min-height: 56px; }
 .brand { display: inline-flex; align-items: center; gap: 10px; background: none; border: 0; padding: 4px 0; cursor: pointer; font-family: var(--serif); font-size: 1.15rem; font-weight: 600; letter-spacing: .01em; }
 .brand-mark { width: 26px; height: 26px; }
@@ -233,6 +233,10 @@ h1 { font-family: var(--serif); font-weight: 600; font-size: clamp(1.8rem, 6vw, 
 .footer { border-top: 1px solid var(--line); padding: 18px 0 28px; color: var(--ink-3); font-size: .82rem; }
 .footer p { margin: 0; }
 
+.leave-confirm { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; margin-bottom: 14px; border: 1.5px solid var(--ink); border-radius: 12px; background: var(--surface); font-size: .95rem; }
+.leave-actions { display: flex; gap: 8px; }
+.primary-btn.small { padding: 9px 16px; font-size: .95rem; }
+
 </style>
 </head>
 <body>
@@ -278,6 +282,10 @@ h1 { font-family: var(--serif); font-weight: 600; font-size: clamp(1.8rem, 6vw, 
 
     <!-- ============ PREGUNTAS ============ -->
     <section id="screen-quiz" class="screen" aria-live="polite">
+      <div class="leave-confirm" id="leave-confirm" role="alertdialog" aria-label="Salir del test" hidden>
+        <span>¿Salir del test? Se perderán tus respuestas.</span>
+        <span class="leave-actions"><button type="button" class="ghost-btn" data-action="leave-no">Seguir</button><button type="button" class="primary-btn small" data-action="leave-yes">Salir</button></span>
+      </div>
       <div class="quiz-head">
         <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Progreso del test">
           <div class="progress-bar" id="progress-bar"></div>
@@ -1761,8 +1769,10 @@ COMPAS.positions = {
       case "review": return openReview();
       case "back-from-review": return show(state.prev || "start");
       case "home":
-        if (currentScreen() === "quiz" && answeredCount() > 0 && !window.confirm("¿Salir del test? Se perderán tus respuestas.")) return;
+        if (currentScreen() === "quiz" && answeredCount() > 0) { $("#leave-confirm").hidden = false; return; }
         return reset();
+      case "leave-yes": $("#leave-confirm").hidden = true; return reset();
+      case "leave-no": $("#leave-confirm").hidden = true; return;
     }
   });
 

@@ -17,6 +17,12 @@ def inline(match):
 
 html = re.sub(r'<script src="([^"]+)"></script>', inline, html)
 
+# Variante para publicar como Artifact de claude.ai: sin doctype/html/head/body (el host los añade)
+art = re.sub(r"<!doctype html>\s*<html[^>]*>\s*<head>|</head>\s*<body>|</body>\s*</html>\s*$", "", html, flags=re.I)
+art = re.sub(r'<meta charset="utf-8">\s*<meta name="viewport"[^>]*>\s*', "", art)
+(ROOT / "dist").mkdir(exist_ok=True)
+(ROOT / "dist" / "artifact.html").write_text(art.strip() + "\n", encoding="utf-8")
+
 out = ROOT / "dist" / "compas-politico.html"
 out.parent.mkdir(exist_ok=True)
 out.write_text(html, encoding="utf-8")

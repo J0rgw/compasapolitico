@@ -513,8 +513,10 @@
       case "review": return openReview();
       case "back-from-review": return show(state.prev || "start");
       case "home":
-        if (currentScreen() === "quiz" && answeredCount() > 0 && !window.confirm("¿Salir del test? Se perderán tus respuestas.")) return;
+        if (currentScreen() === "quiz" && answeredCount() > 0) { $("#leave-confirm").hidden = false; return; }
         return reset();
+      case "leave-yes": $("#leave-confirm").hidden = true; return reset();
+      case "leave-no": $("#leave-confirm").hidden = true; return;
     }
   });
 

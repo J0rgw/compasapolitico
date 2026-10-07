@@ -50,6 +50,10 @@
 
     <!-- ============ PREGUNTAS ============ -->
     <section id="screen-quiz" class="screen" aria-live="polite">
+      <div class="leave-confirm" id="leave-confirm" role="alertdialog" aria-label="Salir del test" hidden>
+        <span>¿Salir del test? Se perderán tus respuestas.</span>
+        <span class="leave-actions"><button type="button" class="ghost-btn" data-action="leave-no">Seguir</button><button type="button" class="primary-btn small" data-action="leave-yes">Salir</button></span>
+      </div>
       <div class="quiz-head">
         <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Progreso del test">
           <div class="progress-bar" id="progress-bar"></div>
