@@ -1,5 +1,5 @@
 /*
- * Matriz de posiciones pregunta × partido.
+ * Batería 2023 · Matriz de posiciones pregunta × partido.
  * ------------------------------------------------------------------
  * Este archivo NO contiene lógica. Edita libremente.
  *
@@ -15,9 +15,7 @@
  *
  * ESTADO: codificación inicial (v0.1). Revisar celdas "b" y fuentes "pendientes de enlazar".
  */
-window.COMPAS = window.COMPAS || {};
-
-COMPAS.positions = {
+COMPAS_DEFINE("2023", "positions", {
   /* ============================ ECO ============================ */
   "ECO-01": {
     psoe: [-1, "a", "prog23"], pp: [0.5, "m", "prog23", "Propone rebajas de IRPF centradas en rentas medias y bajas y deflactación"],
@@ -491,4 +489,4 @@ COMPAS.positions = {
     psoe: [1, "a", "h_acus_popular"], pp: [-1, "a", "decl"], vox: [-1, "a", "decl"], sumar: [0.5, "b", "decl"],
     salf: [-1, "b", "salf:decl"], junts: [0.5, "b", "decl"]
   }
-};
+});

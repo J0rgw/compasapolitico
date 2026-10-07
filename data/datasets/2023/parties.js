@@ -1,5 +1,5 @@
 /*
- * Partidos y registro de fuentes.
+ * Batería 2023 · Partidos y registro de fuentes.
  * ------------------------------------------------------------------
  * Este archivo NO contiene lógica. Edita libremente.
  *
@@ -18,9 +18,9 @@
  *   type: "programa" | "votacion" | "documento" | "declaracion" | "gobierno" | "prensa"
  *   url:  null cuando aún no se ha enlazado el documento exacto ("pendiente de enlazar")
  */
-window.COMPAS = window.COMPAS || {};
+COMPAS_DEFINE("2023", "parties", {
 
-COMPAS.parties = [
+parties: [
   { id: "psoe",  name: "Partido Socialista Obrero Español", short: "PSOE", color: "#E30613", scope: "estatal" },
   { id: "pp",    name: "Partido Popular", short: "PP", color: "#1D5FA8", scope: "estatal" },
   { id: "vox",   name: "Vox", short: "Vox", color: "#5BB12F", scope: "estatal" },
@@ -37,9 +37,9 @@ COMPAS.parties = [
   { id: "bng",   name: "Bloque Nacionalista Galego", short: "BNG", color: "#5DA9E9", scope: "territorial" },
   { id: "ac",    name: "Aliança Catalana", short: "AC", color: "#1F2A44", scope: "territorial",
     note: "Sin representación en el Congreso en la XV Legislatura; posiciones basadas en documentos y declaraciones del partido. Muchas posiciones sin datos." }
-];
+],
 
-COMPAS.sources = {
+sources: {
   /* ---------- Programas electorales (generales 23J-2023) ---------- */
   "psoe:prog23":  { type: "programa", title: "PSOE · Programa electoral generales 23J 2023", url: "https://www.psoe.es/", pending: true },
   "pp:prog23":    { type: "programa", title: "PP · Programa electoral generales 23J 2023", url: "https://www.pp.es/", pending: true },
@@ -94,4 +94,6 @@ COMPAS.sources = {
   "h_dana":       { type: "prensa", title: "Causa judicial de la DANA (Catarroja) y comisión de investigación del Congreso (2025-2026)", url: "https://www.moncloa.com/2026/09/17/causa-dana-2027-aforamiento-mazon-pp-3433052/" },
   "h_acus_popular": { type: "prensa", title: "Proposición de ley del PSOE para limitar la acusación popular (2025)", url: "https://www.congreso.es/" },
   "h_cgpj24":     { type: "prensa", title: "Acuerdo PSOE-PP de renovación del CGPJ (junio 2024) y propuestas sobre el sistema de elección", url: "https://www.congreso.es/" }
-};
+}
+
+});

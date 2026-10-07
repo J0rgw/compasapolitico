@@ -3,30 +3,74 @@
 Test web de **afinidad programática** con los partidos españoles, en seis dimensiones (hexágono), para las elecciones generales del **29 de noviembre de 2026**.
 
 > Este test aproxima la similitud entre tus respuestas y las posiciones registradas de cada partido. **No es una recomendación electoral**, ni una encuesta, ni una predicción.
+>
+> **Aviso:** mientras la batería activa sea la de 2023, todas las posiciones de los partidos son conjeturas basadas en planes electorales antiguos (programas del 23J-2023, votaciones 2023-2026 y declaraciones). La app lo indica al inicio y en los resultados, con el porcentaje de datos antiguos.
 
 ## Uso
 
 - **Sin instalar nada**: abre `index.html` en el navegador (funciona con `file://`, sin servidor ni dependencias).
 - **Versión de un solo archivo**: `dist/compas-politico.html` (generada con `python3 tools/build.py`), útil para compartir o publicar.
-- **GitHub Pages**: sube el repositorio, ve a *Settings › Pages* y elige la rama `main` / carpeta raíz.
+- **GitHub Pages**: ver «Publicación automática» más abajo.
 
 Flujo: inicio → explicación → test rápido (36 preguntas) o completo (88) → progreso → hexágono → posición por dimensión → ranking de afinidad → qué te acerca y te aleja de cada partido → explicación → **Reiniciar test** (borra todas las respuestas y resultados; nada se guarda en el navegador).
 
 ## Estructura
 
 ```
-index.html          Interfaz (cuatro pantallas: inicio, preguntas, resultados, datos y fuentes)
-styles.css          Estilos (móvil primero, modo oscuro automático)
-script.js           Lógica y cálculo. NO contiene datos políticos
-data/questions.js   Dimensiones y preguntas (texto, eje, dirección, peso, contexto, verificación)
-data/parties.js     Partidos y registro de fuentes
-data/positions.js   Matriz pregunta × partido: [valor, confianza, fuente, nota]
-METODOLOGIA.md      Diseño del modelo, fórmulas, sesgos y mitigaciones
-tools/validate.js   Comprueba integridad de datos y muestra perfiles de partidos (node tools/validate.js)
-tools/build.py      Genera dist/compas-politico.html autocontenido
+index.html                     Interfaz (inicio, preguntas, resultados, datos y fuentes)
+styles.css                     Estilos (móvil primero, modo oscuro automático)
+script.js                      Lógica y cálculo. NO contiene datos políticos
+data/config.js                 ← EL CAMPO A CAMBIAR: batería activa ("2023" | "2026")
+data/registry.js               Combinación de baterías por herencia
+data/loader.js                 Carga la batería activa y arranca la app
+data/datasets/index.js         Índice de baterías disponibles
+data/datasets/2023/            dataset.js · questions.js · parties.js · positions.js
+data/datasets/2026/            Igual, pero solo con los CAMBIOS respecto a 2023 (plantilla vacía)
+METODOLOGIA.md                 Diseño del modelo, fórmulas, sesgos y mitigaciones
+tools/validate.js              Valida todas las baterías (node tools/validate.js [batería])
+tools/test-registry.js         Prueba la herencia entre baterías
+tools/set-dataset.js           Cambia de batería, valida y opcionalmente hace commit + push
+tools/build.py                 Genera dist/ (versión de un solo archivo y variante para Artifact)
+.github/workflows/deploy.yml   Valida y publica en GitHub Pages en cada push a main
 ```
 
 Los datos se cargan con `<script>` clásicos (sin ES Modules) para que funcione abriendo el archivo directamente.
+
+## Baterías de preguntas 2023 / 2026
+
+La app no tiene datos fijos: usa la **batería** indicada en `data/config.js`.
+
+```js
+window.COMPAS_CONFIG = {
+  dataset: "2023"   // cámbialo a "2026" cuando esté lista
+};
+```
+
+- **2023**: programas del 23J-2023, votaciones de la legislatura 2023-2026 y declaraciones.
+- **2026**: **hereda todo de 2023** y solo contiene lo que cambia. Puedes actualizarla partido a partido según se publiquen los programas del 29N: cada celda recuerda de qué batería procede, la app marca los datos heredados como «dato 2023» y el aviso inicial muestra qué porcentaje sigue siendo antiguo.
+- Probar sin cambiar la configuración: `index.html?datos=2026`.
+
+### Cuando salgan los programas del 29N
+
+1. Añade las fuentes en `data/datasets/2026/parties.js` (convención `"<partido>:prog26"`).
+2. Escribe las posiciones nuevas o confirmadas en `data/datasets/2026/positions.js` (solo las celdas que cambien; `null` borra la heredada).
+3. Preguntas nuevas en `data/datasets/2026/questions.js`; retirar o reformular las de 2023 con `removeQuestions` / `editQuestions` en `data/datasets/2026/dataset.js`.
+4. Si quieres que la batería 2026 no use nada de 2023, pon `inheritPositions: false`.
+5. Activa y publica:
+
+```bash
+node tools/set-dataset.js 2026 --push
+```
+
+El script cambia `data/config.js`, valida los datos (si fallan, restaura la configuración y no publica), hace commit y push. GitHub Actions publica la web automáticamente.
+
+**Desde el navegador**: también puedes editar `data/config.js` directamente en GitHub (icono del lápiz), cambiar `"2023"` por `"2026"` y pulsar *Commit changes*. La acción valida y publica igual.
+
+### Publicación automática (una sola vez)
+
+1. Crea el repositorio `compasapolitico` en GitHub y sube este proyecto.
+2. *Settings › Pages › Build and deployment › Source*: **GitHub Actions**.
+3. Cada push a `main` ejecuta `.github/workflows/deploy.yml`: prueba la herencia, valida todas las baterías y, solo si todo es correcto, publica la web.
 
 ## Modelo en una frase
 
@@ -41,9 +85,9 @@ Territoriales: ERC, Junts, EH Bildu, PNV, BNG, Aliança Catalana.
 
 Todo se edita en `data/` sin tocar `script.js`:
 
-- **Pregunta por pregunta**: `data/questions.js`.
-- **Partido por partido**: `data/positions.js` (cada celda: `[valor, confianza, fuente, nota]`).
-- **Fuente por fuente**: `data/parties.js › COMPAS.sources`.
+- **Pregunta por pregunta**: `data/datasets/<batería>/questions.js`.
+- **Partido por partido**: `data/datasets/<batería>/positions.js` (cada celda: `[valor, confianza, fuente, nota]`).
+- **Fuente por fuente**: `data/datasets/<batería>/parties.js › sources`.
 - **Vista de revisión**: botón «Datos y fuentes» en la propia app: matriz completa filtrable por partido y dimensión, con estadísticas de celdas sin datos, de confianza baja y con fuente pendiente de enlazar.
 - Tras editar: `node tools/validate.js`.
 

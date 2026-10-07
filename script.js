@@ -1,10 +1,10 @@
 /*
  * Compás Político de España — lógica de la aplicación.
- * No contiene datos políticos: todo se lee de window.COMPAS
- * (data/questions.js, data/parties.js, data/positions.js).
+ * No contiene datos políticos: todo se lee de window.COMPAS, que construye
+ * data/loader.js a partir de la batería elegida en data/config.js.
  * Metodología completa: METODOLOGIA.md
  */
-(function () {
+window.COMPAS_BOOT = function () {
   "use strict";
 
   const C = window.COMPAS || {};
@@ -59,7 +59,38 @@
     const [v, c, s, note] = row[pid];
     if (v === null || v === undefined || Number.isNaN(v)) return null;
     const conf = CONF_FACTOR[c] ? c : "b";
-    return { v, c: conf, k: CONF_FACTOR[conf], src: resolveSource(pid, s), srcKey: s, note };
+    return { v, c: conf, k: CONF_FACTOR[conf], src: resolveSource(pid, s), srcKey: s, note, ds: row[pid]._ds || C.active };
+  }
+
+  /* ---------- Procedencia de los datos (batería y antigüedad de los programas) ---------- */
+  const DATASET_META = C.datasets || {};
+  const isOld = ds => !!(DATASET_META[ds] && DATASET_META[ds].oldPrograms);
+  function provenance() {
+    let total = 0, old = 0;
+    const years = {};
+    for (const q of QUESTIONS) for (const p of PARTIES) {
+      const pos = partyPos(p.id, q.id);
+      if (!pos) continue;
+      total++;
+      if (isOld(pos.ds)) { old++; years[pos.ds] = 1; }
+    }
+    return { total, old, share: total ? old / total : 0, oldSets: Object.keys(years) };
+  }
+  function oldDataNotice() {
+    const pr = provenance();
+    if (!pr.old) return "";
+    const progs = pr.oldSets.map(id => (DATASET_META[id] && DATASET_META[id].programs) || "programas de " + id).join(" y ");
+    const pct = Math.round(pr.share * 100);
+    const lead = pct === 100
+      ? "Todas las posiciones de los partidos son conjeturas basadas en planes electorales antiguos"
+      : pct + " % de las posiciones de los partidos siguen siendo conjeturas basadas en planes electorales antiguos";
+    return '<strong>' + esc(lead) + ".</strong> Proceden de los " + esc(progs) +
+      ", de votaciones de la legislatura 2023-2026 y de declaraciones públicas, no de los programas para el 29N" +
+      (pct === 100 ? ", que aún no se han publicado" : "") + ". Los partidos pueden haber cambiado de posición.";
+  }
+  function dsTag(ds) {
+    const m = DATASET_META[ds];
+    return m && m.oldPrograms ? " · dato " + ds : "";
   }
 
   /* Orden de preguntas: intercalado por dimensiones (evita bloques temáticos). */
@@ -173,7 +204,10 @@
     $("#quick-count").textContent = quick + " preguntas · unos 6 minutos";
     $("#full-count").textContent = QUESTIONS.length + " preguntas · unos 15 minutos";
     $("#data-status").textContent = (meta.status || "") + (meta.updated ? " Última actualización de datos: " + meta.updated + "." : "");
-    $("#footer-version").textContent = meta.version ? "Versión " + meta.version + "." : "";
+    const dsLabel = (C.available && C.available[C.active] && C.available[C.active].label) || C.active;
+    $("#footer-version").textContent = (meta.version ? "Versión " + meta.version + ". " : "") + "Batería de datos: " + dsLabel + ".";
+    const notice = oldDataNotice();
+    document.querySelectorAll(".old-notice").forEach(el => { el.innerHTML = notice; el.hidden = !notice; });
   }
 
   function startQuiz(mode) {
@@ -377,7 +411,7 @@
     const src = i.p.src;
     const srcHtml = src ? (src.url ? '<a href="' + esc(src.url) + '" target="_blank" rel="noopener">' + esc(src.title) + "</a>" : esc(src.title)) : "sin fuente";
     return "<li><span class=\"wq\">" + esc(i.q.text) + '</span><span class="wa">Tú: ' + esc(labelFor(i.a)) +
-      " · Partido: " + esc(labelFor(i.p.v)) + " (confianza " + CONF_LABEL[i.p.c] + ")" +
+      " · Partido: " + esc(labelFor(i.p.v)) + " (confianza " + CONF_LABEL[i.p.c] + esc(dsTag(i.p.ds)) + ")" +
       (i.p.note ? " · " + esc(i.p.note) : "") + "<br>Fuente: " + srcHtml + "</span></li>";
   }
 
@@ -461,8 +495,11 @@
       if (pos.c === "b") lowc++;
       if (!pos.src || pos.src.pending || !pos.src.url) pending++;
     }));
-    $("#review-stats").textContent = qs.length + " preguntas · " + parties.length + " partidos · " + cells + " celdas: " +
-      (cells - nulls) + " con posición, " + nulls + " sin datos, " + lowc + " de confianza baja, " + pending + " con fuente pendiente de enlazar.";
+    let oldc = 0;
+    qs.forEach(q => parties.forEach(p => { const pos = partyPos(p.id, q.id); if (pos && isOld(pos.ds)) oldc++; }));
+    $("#review-stats").textContent = "Batería activa: " + C.active + " (" + (C.chain || []).join(" → ") + "). " +
+      qs.length + " preguntas · " + parties.length + " partidos · " + cells + " celdas: " +
+      (cells - nulls) + " con posición (" + oldc + " de programas antiguos), " + nulls + " sin datos, " + lowc + " de confianza baja, " + pending + " con fuente pendiente de enlazar.";
 
     $("#review-body").innerHTML = qs.map(q => {
       const d = dimById[q.dim];
@@ -473,7 +510,7 @@
         const src = pos.src;
         const srcHtml = src ? (src.url ? '<a href="' + esc(src.url) + '" target="_blank" rel="noopener">' + esc(src.title) + "</a>" : esc(src.title)) + (src.pending ? " (pendiente de enlazar)" : "") : "sin fuente: " + esc(pos.srcKey || "");
         return '<div class="rc conf-' + pos.c + '" style="border-left-color:' + p.color + '"><b>' + esc(p.short) + '</b><span class="rv">' +
-          fmtNum(pos.v, 1) + " · " + esc(labelFor(pos.v)) + " · conf. " + CONF_LABEL[pos.c] + "</span>" +
+          fmtNum(pos.v, 1) + " · " + esc(labelFor(pos.v)) + " · conf. " + CONF_LABEL[pos.c] + " · batería " + esc(pos.ds) + "</span>" +
           (pos.note ? '<span class="rs">' + esc(pos.note) + "</span>" : "") + '<span class="rs">' + srcHtml + "</span></div>";
       }).join("");
       return '<div class="rq"><div class="rq-head">' + head + '</div><p class="rq-text">' + esc(q.text) + "</p>" +
@@ -541,4 +578,4 @@
   window.COMPAS_ENGINE = { affinity, axisScores, partyAxis, partyPos, buildList, _setAnswers: a => { state.answers = a; } };
 
   renderStart();
-})();
+};

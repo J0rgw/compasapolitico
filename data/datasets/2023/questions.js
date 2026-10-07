@@ -1,5 +1,5 @@
 /*
- * Dimensiones y banco de preguntas.
+ * Batería 2023 · Dimensiones y banco de preguntas.
  * ------------------------------------------------------------------
  * Este archivo NO contiene lógica. Edita libremente.
  *
@@ -20,16 +20,9 @@
  *   context (opcional) contexto factual breve y neutral mostrado al usuario
  *   verify  (opcional) qué hay que comprobar antes de publicar
  */
-window.COMPAS = window.COMPAS || {};
+COMPAS_DEFINE("2023", "questions", {
 
-COMPAS.meta = {
-  version: "0.1.0",
-  updated: "2026-10-07",
-  election: "Elecciones generales del 29 de noviembre de 2026",
-  status: "Borrador: posiciones basadas en programas de 2023, votaciones de la XV Legislatura y declaraciones. Pendiente de actualizar con los programas del 29N."
-};
-
-COMPAS.dimensions = [
+dimensions: [
   { id: "ECO", abbr: "Economía", posAbbr: "Mercado", name: "Economía y Estado", neg: "Intervención y redistribución", pos: "Mercado y menos impuestos",
     desc: "Papel del Estado en la economía: impuestos, gasto público, regulación de precios y vivienda, mercado laboral, gestión pública o privada de servicios, regulación ambiental y energética." },
   { id: "SOC", abbr: "Valores", posAbbr: "Conservador", name: "Valores sociales", neg: "Progresista / cambio", pos: "Conservador / tradición",
@@ -42,9 +35,9 @@ COMPAS.dimensions = [
     desc: "OTAN y gasto militar, Ucrania, Israel y Palestina, Sáhara Occidental y Marruecos, bases de EE. UU., integración europea y cooperación al desarrollo." },
   { id: "INS", abbr: "Instituciones", posAbbr: "Contrapesos", name: "Instituciones y poder", neg: "Primacía de la mayoría parlamentaria", pos: "Contrapesos y responsabilidad estricta",
     desc: "Amnistía e indultos, elección del CGPJ y del fiscal general, responsabilidad política frente a penal, acusación popular, financiación de partidos y regulación de Internet." }
-];
+],
 
-COMPAS.questions = [
+questions: [
   /* ====================== ECO · Economía y Estado ====================== */
   { id: "ECO-01", dim: "ECO", dir: 1, w: 1, core: true, topic: "Impuestos",
     text: "Debería bajarse el IRPF a todos los tramos de renta, aunque eso obligue a reducir el gasto público." },
@@ -259,4 +252,6 @@ COMPAS.questions = [
   { id: "INS-14", dim: "INS", dir: -1, w: 1, topic: "Justicia",
     text: "Debería limitarse la acusación popular para que partidos políticos y asociaciones vinculadas a ellos no puedan ejercerla.",
     context: "La acusación popular permite a ciudadanos y asociaciones personarse en causas penales; la han ejercido partidos y asociaciones de distinto signo." }
-];
+]
+
+});

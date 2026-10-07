@@ -206,9 +206,14 @@ Reglas:
 
 ## Cómo revisar el modelo sin tocar la lógica
 
-- **Preguntas**: `data/questions.js` (texto, dimensión, dirección, peso, `core`, contexto, verificación).
-- **Partidos y fuentes**: `data/parties.js` (metadatos, colores y registro de fuentes).
-- **Posiciones**: `data/positions.js` (matriz pregunta × partido: `[valor, confianza, fuente, nota]`).
-- **Vista de revisión**: abre `revision.html` para ver la matriz completa con fuentes, filtrar por partido y detectar celdas sin fuente o de baja confianza.
+Los datos están organizados en **baterías** (`data/datasets/<id>/`) y la activa se elige en `data/config.js`.
 
-`script.js` no contiene ningún dato político: solo lee esos tres archivos.
+- **Preguntas**: `questions.js` (texto, dimensión, dirección, peso, `core`, contexto, verificación).
+- **Partidos y fuentes**: `parties.js` (metadatos, colores y registro de fuentes).
+- **Posiciones**: `positions.js` (matriz pregunta × partido: `[valor, confianza, fuente, nota]`).
+- **Ficha**: `dataset.js` (herencia, preguntas retiradas o reformuladas, `oldPrograms`).
+- **Vista de revisión**: botón «Datos y fuentes» en la app; indica la batería de procedencia de cada celda.
+
+La batería 2026 hereda de 2023 y cada celda conserva su procedencia. Mientras queden celdas de baterías marcadas como `oldPrograms: true`, la app avisa al inicio y en los resultados de que esas posiciones son conjeturas basadas en planes electorales antiguos, con el porcentaje correspondiente.
+
+`script.js` no contiene ningún dato político: solo lee el objeto combinado que construye `data/loader.js`.

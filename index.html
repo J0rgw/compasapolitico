@@ -23,6 +23,7 @@
     <section id="screen-start" class="screen is-active" aria-labelledby="start-title">
       <p class="eyebrow" id="election-label"></p>
       <h1 id="start-title">¿Con qué partidos coinciden tus ideas?</h1>
+      <p class="old-notice" role="note" hidden></p>
       <p class="lead">Responde a una serie de afirmaciones sobre temas políticos actuales de España. Al final verás tu posición en <strong>seis dimensiones</strong> y tu grado de <strong>similitud</strong> con las posiciones registradas de cada partido.</p>
 
       <ul class="facts">
@@ -91,6 +92,7 @@
       <p class="eyebrow">Resultado</p>
       <h1 id="results-title">Tu posición política</h1>
       <p class="lead small" id="results-summary"></p>
+      <p class="old-notice" role="note" hidden></p>
 
       <div class="panel">
         <h2 class="panel-title">Tu hexágono</h2>
@@ -158,10 +160,12 @@
     </div>
   </footer>
 
-  <!-- Datos (sin módulos ES, para que funcione abriendo el archivo directamente) -->
-  <script src="data/questions.js"></script>
-  <script src="data/parties.js"></script>
-  <script src="data/positions.js"></script>
+  <!-- Sin módulos ES, para que funcione abriendo el archivo directamente.
+       La batería de datos se elige en data/config.js y la carga data/loader.js. -->
+  <script src="data/config.js"></script>
+  <script src="data/registry.js"></script>
+  <script src="data/datasets/index.js"></script>
   <script src="script.js"></script>
+  <script src="data/loader.js"></script>
 </body>
 </html>
