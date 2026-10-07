@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Compás Político de España</title>
+  <meta name="description" content="Test de afinidad programática con los partidos españoles en seis dimensiones. No es una recomendación de voto.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <button class="brand" type="button" data-action="home" aria-label="Volver al inicio">
+        <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><polygon points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5" fill="none" stroke="currentColor" stroke-width="2.5"/><polygon points="20,12 28,17 26,27 15,29 11,20" fill="currentColor" opacity=".85"/></svg>
+        <span>Compás Político</span>
+      </button>
+      <button class="link-btn" type="button" data-action="review">Datos y fuentes</button>
+    </div>
+  </header>
+
+  <main class="wrap" id="app">
+    <!-- ============ INICIO ============ -->
+    <section id="screen-start" class="screen is-active" aria-labelledby="start-title">
+      <p class="eyebrow" id="election-label"></p>
+      <h1 id="start-title">¿Con qué partidos coinciden tus ideas?</h1>
+      <p class="lead">Responde a una serie de afirmaciones sobre temas políticos actuales de España. Al final verás tu posición en <strong>seis dimensiones</strong> y tu grado de <strong>similitud</strong> con las posiciones registradas de cada partido.</p>
+
+      <ul class="facts">
+        <li><strong>Seis ejes, no uno.</strong> Economía, valores sociales, modelo territorial, inmigración y seguridad, exterior y defensa, e instituciones.</li>
+        <li><strong>Afinidad ≠ recomendación.</strong> Cada porcentaje mide solo cuánto se parecen tus respuestas a las posiciones de un partido. No suman 100 %.</li>
+        <li><strong>«No tengo suficiente información»</strong> no cuenta como respuesta neutral: esa pregunta se excluye.</li>
+        <li><strong>Privado.</strong> Tus respuestas no se guardan ni se envían a ningún sitio.</li>
+      </ul>
+
+      <div class="mode-grid">
+        <button class="mode-card" type="button" data-action="start" data-mode="quick">
+          <span class="mode-title">Test rápido</span>
+          <span class="mode-meta" id="quick-count"></span>
+          <span class="mode-desc">Las preguntas más representativas de cada eje.</span>
+        </button>
+        <button class="mode-card" type="button" data-action="start" data-mode="full">
+          <span class="mode-title">Test completo</span>
+          <span class="mode-meta" id="full-count"></span>
+          <span class="mode-desc">Todas las preguntas. Resultado más preciso.</span>
+        </button>
+      </div>
+
+      <p class="notice" id="data-status"></p>
+    </section>
+
+    <!-- ============ PREGUNTAS ============ -->
+    <section id="screen-quiz" class="screen" aria-live="polite">
+      <div class="quiz-head">
+        <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Progreso del test">
+          <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <div class="quiz-meta">
+          <span id="q-counter"></span>
+          <button class="link-btn" type="button" data-action="finish" id="finish-early" hidden>Ver resultados ya</button>
+        </div>
+      </div>
+
+      <article class="q-card">
+        <p class="q-dim" id="q-dim"></p>
+        <h2 class="q-text" id="q-text"></h2>
+        <details class="q-context" id="q-context" hidden>
+          <summary>Contexto</summary>
+          <p id="q-context-text"></p>
+        </details>
+
+        <div class="scale" id="scale" role="group" aria-label="Tu grado de acuerdo"></div>
+
+        <div class="q-secondary">
+          <button type="button" class="ghost-btn" data-answer="dk">No tengo suficiente información</button>
+        </div>
+      </article>
+
+      <nav class="q-nav">
+        <button type="button" class="ghost-btn" data-action="prev" id="btn-prev">← Anterior</button>
+        <button type="button" class="ghost-btn" data-action="skip">Saltar →</button>
+      </nav>
+      <p class="hint">Atajos de teclado: 1–5 para responder, 0 para «no tengo información», ← para volver.</p>
+    </section>
+
+    <!-- ============ RESULTADOS ============ -->
+    <section id="screen-results" class="screen" aria-labelledby="results-title">
+      <p class="eyebrow">Resultado</p>
+      <h1 id="results-title">Tu posición política</h1>
+      <p class="lead small" id="results-summary"></p>
+
+      <div class="panel">
+        <h2 class="panel-title">Tu hexágono</h2>
+        <p class="panel-sub">Cada vértice es una dimensión. Cuanto más cerca del borde, más cerca del polo indicado en el vértice; el centro corresponde al polo opuesto. Toca partidos para superponerlos.</p>
+        <div class="radar-wrap"><svg id="radar" viewBox="-20 20 440 360" role="img" aria-labelledby="radar-title radar-desc"><title id="radar-title">Hexágono de posición política</title><desc id="radar-desc">Tu posición y la de los partidos seleccionados en las seis dimensiones</desc></svg></div>
+        <div class="chips" id="radar-chips" role="group" aria-label="Partidos superpuestos en el hexágono"></div>
+      </div>
+
+      <div class="panel">
+        <h2 class="panel-title">Tu posición en cada dimensión</h2>
+        <p class="panel-sub">Rombo negro: tú. Puntos de color: posición registrada de cada partido.</p>
+        <div id="dim-strips"></div>
+      </div>
+
+      <div class="panel">
+        <h2 class="panel-title">Afinidad política</h2>
+        <p class="panel-sub">Mayor afinidad según tus respuestas. Cada porcentaje es independiente: indica similitud, no probabilidad de voto. Toca un partido para ver qué te acerca y qué te aleja.</p>
+        <label class="toggle"><input type="checkbox" id="hide-territorial"> Ocultar partidos territoriales</label>
+        <ol class="ranking" id="ranking"></ol>
+        <div id="low-coverage"></div>
+      </div>
+
+      <div class="panel">
+        <h2 class="panel-title">Qué mide cada dimensión</h2>
+        <dl class="dim-explain" id="dim-explain"></dl>
+      </div>
+
+      <div class="panel muted">
+        <h2 class="panel-title">Cómo se calcula</h2>
+        <p>Tus respuestas se convierten en valores de −1 (totalmente en desacuerdo) a +1 (totalmente de acuerdo). Las posiciones de los partidos usan la misma escala y proceden de programas, votaciones y declaraciones (ver «Datos y fuentes»).</p>
+        <p>La <strong>afinidad</strong> es 100 × (1 − distancia), donde la distancia es la media cuadrática ponderada de las diferencias entre tus respuestas y las del partido, pregunta a pregunta, dando el mismo peso a cada dimensión. Se calcula sobre todas las preguntas, no sobre el hexágono: por eso dos partidos alejados en el eje izquierda-derecha pueden coincidir contigo en temas concretos.</p>
+        <p>Solo se comparan preguntas en las que tú has opinado y el partido tiene posición documentada. Si un partido tiene datos en menos de la mitad de tus respuestas, se muestra aparte.</p>
+        <p class="disclaimer">Este test aproxima afinidad programática. No es una encuesta, ni una predicción, ni una recomendación electoral.</p>
+      </div>
+
+      <div class="reset-row">
+        <button type="button" class="primary-btn" data-action="reset">Reiniciar test</button>
+      </div>
+    </section>
+
+    <!-- ============ REVISIÓN DE DATOS ============ -->
+    <section id="screen-review" class="screen" aria-labelledby="review-title">
+      <p class="eyebrow">Transparencia</p>
+      <h1 id="review-title">Datos y fuentes</h1>
+      <p class="lead small">Matriz completa de posiciones por pregunta y partido, con su fuente y nivel de confianza. Sirve para revisar el modelo pregunta por pregunta, partido por partido y fuente por fuente.</p>
+      <div class="review-controls">
+        <label>Partido
+          <select id="review-party"></select>
+        </label>
+        <label>Dimensión
+          <select id="review-dim"></select>
+        </label>
+      </div>
+      <div id="review-stats" class="review-stats"></div>
+      <div id="review-body"></div>
+      <div class="reset-row">
+        <button type="button" class="ghost-btn" data-action="back-from-review">← Volver</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p>Proyecto abierto y revisable. Afinidad programática aproximada; no constituye recomendación de voto. <span id="footer-version"></span></p>
+    </div>
+  </footer>
+
+  <!-- Datos (sin módulos ES, para que funcione abriendo el archivo directamente) -->
+  <script src="data/questions.js"></script>
+  <script src="data/parties.js"></script>
+  <script src="data/positions.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
